@@ -1,0 +1,53 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.82in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\definecolor{violet}{HTML}{6556D9}
+\definecolor{ink}{HTML}{202B40}
+\definecolor{muted}{HTML}{68758B}
+\hypersetup{colorlinks=true,linkcolor=violet,urlcolor=violet,pdftitle={QueryQuest AI Project Report},pdfauthor={QueryQuest AI}}
+\titleformat{\section}{\large\bfseries\color{ink}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{violet}}{\thesubsection}{0.7em}{}
+\setlist[itemize]{leftmargin=1.4em,itemsep=3pt,topsep=4pt}
+\pagestyle{fancy}\fancyhf{}\lhead{\small QueryQuest AI}\rhead{\small Project report}\cfoot{\thepage}
+\begin{document}
+\begin{titlepage}\centering\vspace*{1.15in}{\color{violet}\Large QUERYQUEST AI\par}\vspace{0.18in}{\Huge\bfseries AI Database Assistant\par}\vspace{0.22in}{\large Project report and artifact guide\par}\vspace{0.55in}\rule{0.72\textwidth}{0.7pt}\par\vspace{0.3in}{\large React + Vite \quad $\cdot$ \quad Vercel-ready \quad $\cdot$ \quad OpenAI Responses API\par}\vspace{0.35in}{\color{muted}\large October 30, 2026\par}\vfill\begin{minipage}{0.78\textwidth}\centering\color{muted}QueryQuest AI is an educational web application for learning SQL through natural-language questions, explanations, and safe practice using fictional sample data.\end{minipage}\vfill\end{titlepage}
+\section{Project overview}
+QueryQuest AI helps a learner move from a question in everyday language to a SQL draft they can inspect and learn from. The interface combines an AI prompt, editable SQL, a plain-language explanation, a schema browser, a practice challenge, and a small results preview. The implementation is a frontend application with a serverless AI endpoint prepared for deployment.
+\subsection{Goals}
+\begin{itemize}\item Make SQL more approachable by starting with a natural-language question.\item Show generated queries with explanations so learners can review the logic.\item Offer a fictional ShopSmart schema for practice without real customer data.\item Keep the AI credential server-side and configure the project for Vercel.\end{itemize}
+\section{Application design}
+The app uses React and Vite. React state controls the prompt, SQL editor, explanation, challenge, errors, and results preview. Vite supplies local development and production frontend builds. The layout adapts to narrow screens and includes workspace navigation, schema cards, query controls, and a daily challenge.
+The sample schema has four fictional tables: \texttt{products}, \texttt{customers}, \texttt{orders}, and \texttt{order\_items}. Its relationships are provided to the AI to inform common joins.
+\subsection{AI request flow}
+\begin{enumerate}[leftmargin=1.6em,itemsep=3pt]\item The browser sends the question to the same-origin \texttt{/api/generate} endpoint.\item The serverless function validates the request length and checks the API key configuration.\item The function sends the question and schema to the OpenAI Responses API, requesting structured JSON containing SQL, an explanation, and a practice prompt.\item The browser displays the draft for review. The endpoint does not execute the SQL or connect to a database.\end{enumerate}
+The API key is read from the deployment environment and is not embedded in the frontend. The model is configurable through \texttt{OPENAI\_MODEL}; the default is \texttt{gpt-4.1-mini}.
+\subsection{Safe practice preview}
+The browser preview uses a small set of fictional rows. It supports basic single-table \texttt{SELECT}, \texttt{WHERE}, \texttt{ORDER BY}, and \texttt{LIMIT} examples. It is an instructional preview, not a PostgreSQL engine. Complex joins and aggregate SQL may be generated for learning but are not fully evaluated. Common data-changing keywords are rejected. This preview is not a security boundary and must not connect directly to a production database.
+\section{Project artifacts}
+\begin{description}[leftmargin=1.55in,style=nextline,itemsep=4pt]
+\item[\texttt{src/main.jsx}] React app, sample schema, AI request interaction, and query preview.
+\item[\texttt{src/style.css}] Responsive visual styling.
+\item[\texttt{api/generate.js}] Vercel function for AI SQL generation and explanation.
+\item[\texttt{vercel.json}] Vercel routing configuration.
+\item[\texttt{package.json}] React/Vite dependencies and development/build commands.
+\item[\texttt{.env.example}] Server-side environment variable names; no secrets.
+\item[\texttt{README.md}] Local setup, deployment steps, scope, and safety notes.
+\end{description}
+\section{Run and deployment}
+For local frontend development, install Node dependencies and run \texttt{npm run dev}. To test the serverless API locally, use Vercel CLI with a local environment file containing \texttt{OPENAI\_API\_KEY}; keep it out of version control.
+To deploy, import the project directory into Vercel, set \texttt{OPENAI\_API\_KEY} in project environment variables, optionally set \texttt{OPENAI\_MODEL}, then deploy. Vercel serves the frontend and \texttt{api/generate.js} function. A key is required for AI generation; provider usage may incur charges.
+\section{Links and publication status}
+The application is publicly deployed on Vercel and its source is published in a public GitHub repository.
+\begin{itemize}\item Live app: \href{https://queryquest-ai.vercel.app}{https://queryquest-ai.vercel.app}.\item GitHub repository: \href{https://github.com/Armstrfa/queryquest-ai}{github.com/Armstrfa/queryquest-ai}.\end{itemize}
+The site is public. AI generation requires \texttt{OPENAI\_API\_KEY} to be added to the Vercel project's encrypted environment variables; until then the API returns a setup message.
+\section{Limitations and next steps}
+AI generation requires an OpenAI API key and has not been exercised against a live provider from this workspace. Generated SQL may be wrong and should be reviewed. The preview runner supports only a restricted SQL subset on fictional rows. The endpoint's in-memory rate cap is best-effort per warm serverless instance, not a durable distributed limiter. The challenge is a learning prompt; persistent scoring and accounts are not implemented.
+Next, add the key as a protected Vercel environment variable and redeploy. Before adding real database connectivity, implement server-side SQL parsing, authorization, execution limits, and a read-only database role.
+\vfill\noindent\textcolor{muted}{Prepared as the project report for QueryQuest AI.}\end{document}
